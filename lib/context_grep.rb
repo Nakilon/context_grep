@@ -1,6 +1,7 @@
 require "linguist"
+require "pathname"  # undefined method `Pathname' for TreeSitter:Module (NoMethodError)
 require "tree_stand"
-TreeStand.config.parser_path = File.expand_path "~/.contextgrep"
+TreeStand.config.parser_path = File.expand_path "~/.context_grep"
 
 def ContextGrep pattern
   `#{system("rg --version >/dev/null 2>&1") ? "rg -n" : "grep -nrI"} #{pattern} . 2>/dev/null`
