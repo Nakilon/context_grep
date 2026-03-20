@@ -7,8 +7,12 @@ Usage:
 $ cogrep something
 ```
 
+The following example demonstrates:
+1. how it merges multiple matched lines from one file
+2. how it relies on actual syntax, not indentation
+3. how to run it with ruby >= 3.1 (required for the gem ruby_tree_sitter) if your local is lower, in case of rbenv
 
-It requires at least Ruby 3.1 for the gem ruby_tree_sitter.
+<img width="1401" height="494" alt="image" src="https://github.com/user-attachments/assets/9d94479f-9979-4d29-a46a-aa9774750a30" />
 
 Currently it passes `.` as grep input.
 
