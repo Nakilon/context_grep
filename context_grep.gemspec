@@ -1,6 +1,6 @@
 Gem::Specification.new do |spec|
   spec.name         = "context_grep"
-  spec.version      = "0.0.1"
+  spec.version      = "0.1.0"
   spec.summary      = "grep results with syntactic parent chains"
 
   spec.author       = "Victor Maslov aka Nakilon"
