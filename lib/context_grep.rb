@@ -34,24 +34,31 @@ def ContextGrep pattern
         require "zip"
         ::FileUtils.mkdir_p ::TreeStand.config.parser_path
         zip_filename = ::File.join ::TreeStand.config.parser_path, "temp.zip"
+        lambda do
         "https://github.com/Faveod/tree-sitter-parsers/releases/download/v5.0/tree-sitter-parsers-5.0-#{
           "Darwin" == ::Etc.uname[:sysname] ? "macos" : "linux"
         }-#{
           ::RbConfig::CONFIG["host_cpu"] =~ /x86_64|amd64/ ? "x64" : "arm64"
         }.zip".tap do |url|
-          puts "downloading #{url} to #{::TreeStand.config.parser_path}"
+            ::STDERR.puts "downloading #{url} to #{::TreeStand.config.parser_path}"
           ::File.binwrite zip_filename, ::URI.open(url, &:read)
         end
         ::Zip::File.open(zip_filename) do |zip|
           for entry in zip
             next if entry.directory?
             target_path = ::File.join ::TreeStand.config.parser_path, ::File.basename(entry.name)
-            ::FileUtils.rm_f target_path
+              next if ::File.exists? target_path
             entry.extract target_path
+              begin
+                return ::TreeStand::Parser.new ts_name
+              rescue ::TreeSitter::ParserNotFoundError
+                ::FileUtils.rm_f target_path
+              end
           end
         end
-        ::FileUtils.rm zip_filename
-        ::TreeStand::Parser.new ts_name
+        ensure
+          ::FileUtils.rm_f zip_filename
+        end.call
       end.parse_string(src).root_node
     ]
     nodes = {}
@@ -69,7 +76,7 @@ def ContextGrep pattern
             if ::ENV["COGREP_DEBUGTYPES"]
               s = node.ts_node.start_point.row + 1
               e = node.ts_node.end_point.row + 1
-              puts "#{::File.basename file} #{node.type.inspect} #{s}-#{e}: #{src.lines[s - 1]}"
+              ::STDERR.puts "#{::File.basename file} #{node.type.inspect} #{s}-#{e}: #{src.lines[s - 1]}"
             end
             lines.push node.ts_node.start_point.row unless %i{ program body_statement translation_unit }.include? node.type
           end while node = nodes[node]
