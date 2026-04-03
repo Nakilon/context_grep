@@ -37,7 +37,7 @@ $ cogrep PATTERN [PATH]
 
 2. example demonstrates passing a regex pattern, flags and path, also multiline parents (3-4)
     ```none
-    $ cogrep '[^a-zA-Z]BuyerItemCode -g*.xml'' ..
+    $ cogrep '[^a-zA-Z]BuyerItemCode -g*.xml' ..
 
     ../foobar/schema.xml
        1 <?xml version="1.0" encoding="UTF-8"?>
