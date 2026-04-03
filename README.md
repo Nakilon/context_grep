@@ -35,9 +35,9 @@ $ cogrep PATTERN [PATH]
      122   # NOTE: never call parent on root. It will segfault.
     ```
 
-2. example demonstrates passing a regex pattern and path for grepping, also multiline parents (3-4)
+2. example demonstrates passing a regex pattern, flags and path, also multiline parents (3-4)
     ```none
-    $ cogrep '[^a-zA-Z]BuyerItemCode' ..
+    $ cogrep '[^a-zA-Z]BuyerItemCode -g*.xml'' ..
 
     ../foobar/schema.xml
        1 <?xml version="1.0" encoding="UTF-8"?>
