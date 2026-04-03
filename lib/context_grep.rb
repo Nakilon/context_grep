@@ -3,8 +3,11 @@ require "pathname"  # undefined method `Pathname' for TreeSitter:Module (NoMetho
 require "tree_stand"
 ::TreeStand.config.parser_path = ::File.expand_path "~/.context_grep"
 
-def ContextGrep pattern
-  `#{system("rg --version >/dev/null 2>&1") ? "rg -n" : "grep -nrI"} #{pattern} . 2>/dev/null`
+require "fileutils"
+ZIP_FILENAME = ::File.join ::TreeStand.config.parser_path, "temp.zip"
+def ContextGrep what, where = "."
+
+  `#{system("rg --version >/dev/null 2>&1") ? "rg -n" : "grep -nrI"} #{what} #{where} 2>/dev/null`
   .scan(/^([^:]+):(\d+):/).group_by(&:first).map do |file, group|
     lang = ::Linguist::FileBlob.new(file).language
     next ::STDERR.puts "unsupported grammar #{lang} at #{file}" unless ts_name = {
@@ -23,27 +26,27 @@ def ContextGrep pattern
         "Python" => "python",
         "Ruby" => "ruby",
         "Rust" => "rust",
+        "XML" => "xml",
     }[lang.name]
     src = ::File.read file
     stack = [
       begin
         ::TreeStand::Parser.new ts_name
       rescue ::TreeSitter::ParserNotFoundError
-        # require "fileutils"
-        require "open-uri"
-        require "zip"
         ::FileUtils.mkdir_p ::TreeStand.config.parser_path
-        zip_filename = ::File.join ::TreeStand.config.parser_path, "temp.zip"
-        lambda do
+        require "etc"
+        require "open-uri"
         "https://github.com/Faveod/tree-sitter-parsers/releases/download/v5.0/tree-sitter-parsers-5.0-#{
           "Darwin" == ::Etc.uname[:sysname] ? "macos" : "linux"
         }-#{
           ::RbConfig::CONFIG["host_cpu"] =~ /x86_64|amd64/ ? "x64" : "arm64"
         }.zip".tap do |url|
             ::STDERR.puts "downloading #{url} to #{::TreeStand.config.parser_path}"
-          ::File.binwrite zip_filename, ::URI.open(url, &:read)
-        end
-        ::Zip::File.open(zip_filename) do |zip|
+          ::File.binwrite ZIP_FILENAME, ::URI.open(url, &:read)
+        end unless File.exist? ZIP_FILENAME
+        require "zip"
+        lambda do
+          ::Zip::File.open(ZIP_FILENAME) do |zip|
           for entry in zip
             next if entry.directory?
             target_path = ::File.join ::TreeStand.config.parser_path, ::File.basename(entry.name)
@@ -55,10 +58,9 @@ def ContextGrep pattern
                 ::FileUtils.rm_f target_path
               end
           end
-        end
-        ensure
-          ::FileUtils.rm_f zip_filename
-        end.call
+          end
+          nil
+        end.call or next ::STDERR.puts "can't find grammar library for #{lang} at #{file}"
       end.parse_string(src).root_node
     ]
     nodes = {}
@@ -85,4 +87,6 @@ def ContextGrep pattern
     ]
   end.compact
 
+ensure
+  ::FileUtils.rm_f ZIP_FILENAME
 end

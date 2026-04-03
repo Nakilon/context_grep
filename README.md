@@ -12,13 +12,13 @@ $ gem install context_grep
 ## Usage
 
 ```console
-$ cogrep something
+$ cogrep PATTERN [PATH]
 ```
 
 ## Examples
 
-1. it skips unsupported grammars
-    ```
+1. example shows that it skips unsupported grammars
+    ```none
     ruby-tree-sitter $ cogrep segfa
                                                                                 
     unsupported grammar Markdown at ./docs/SIGSEGV.md
@@ -35,7 +35,22 @@ $ cogrep something
      122   # NOTE: never call parent on root. It will segfault.
     ```
 
-2. demonstrates how
+2. example demonstrates passing a regex pattern and path for grepping, also multiline parents (3-4)
+    ```none
+    $ cogrep '[^a-zA-Z]BuyerItemCode' ..
+
+    ../foobar/schema.xml
+       1 <?xml version="1.0" encoding="UTF-8"?>
+       3 <xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema" elementFormDefault="qualified"
+       4           attributeFormDefault="unqualified" version="0.6">
+      29    <xs:element name="BuyerItemCode" type="string26"/>
+     139    <xs:element name="Line-Item">
+     140        <xs:complexType>
+     141            <xs:choice maxOccurs="unbounded">
+     146                <xs:element ref="BuyerItemCode" minOccurs="0"/>
+    ```
+
+3. example demonstrates how
     1. it merges multiple matched lines from one file
     2. it relies on actual syntax, not indentation
     3. to run it with ruby >= 3.1 (required for the gem ruby_tree_sitter) if your local is lower, in case of rbenv
@@ -44,6 +59,10 @@ $ cogrep something
 
 ## Additional grammars
 
+You might see the following:
+```none
+can't find grammar library for XML at ...
+```
 Unfortunately the tree-sitter community does not provide precompiled grammars so if one is not listed here https://github.com/Faveod/tree-sitter-parsers/blob/v5.0/parsers.toml it should be chosen from https://github.com/tree-sitter/tree-sitter/wiki/List-of-parsers, and downloaded/compiled manually. For example:
 ```console
 $ git clone https://github.com/tree-sitter-grammars/tree-sitter-xml
@@ -51,4 +70,10 @@ $ cd tree-sitter-xml
 $ npm install tree-sitter
 $ make
 $ cp xml/libtree-sitter-xml.dylib ~/.context_grep/
+```
+
+## Development:
+
+```console
+$ rake -rbundler/gem_tasks release
 ```

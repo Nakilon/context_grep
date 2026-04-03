@@ -1,7 +1,7 @@
 #!/usr/bin/env ruby
-abort "usage:\tcogrep <pattern>" unless 1 == ARGV.size
+abort "usage:\tcogrep PATTERN [PATH]" unless 1 == ARGV.size || 2 == ARGV.size
 require_relative "../lib/context_grep"
-ContextGrep(ARGV[0]).each do |file, lines|
+ContextGrep(*ARGV).each do |file, lines|
   puts file
   for lineno, line in lines
     puts "%4s %s" % [lineno, line]
