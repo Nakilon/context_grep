@@ -2,18 +2,20 @@
 
 It passes the query to the underlying grep (or ripgrep, if installed), and then prints not just "N lines of context" like you usually do, but the chains of syntactic parent lines for each match.
 
-## Installation:
+## Installation
+
 ```console
 $ brew install icu4c       # for github-linguist, install in the way according to your system
 $ gem install context_grep
 ```
 
-## Usage:
+## Usage
+
 ```console
 $ cogrep something
 ```
 
-## Examples:
+## Examples
 
 1. it skips unsupported grammars
     ```
@@ -40,4 +42,13 @@ $ cogrep something
     
     <img width="1401" height="494" alt="image" src="https://github.com/user-attachments/assets/9d94479f-9979-4d29-a46a-aa9774750a30" />
 
-Currently it passes `.` as grep input.
+## Additional grammars
+
+Unfortunately the tree-sitter community does not provide precompiled grammars so if one is not listed here https://github.com/Faveod/tree-sitter-parsers/blob/v5.0/parsers.toml it should be chosen from https://github.com/tree-sitter/tree-sitter/wiki/List-of-parsers, and downloaded/compiled manually. For example:
+```console
+$ git clone https://github.com/tree-sitter-grammars/tree-sitter-xml
+$ cd tree-sitter-xml
+$ npm install tree-sitter
+$ make
+$ cp xml/libtree-sitter-xml.dylib ~/.context_grep/
+```
