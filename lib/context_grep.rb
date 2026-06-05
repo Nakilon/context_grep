@@ -3,11 +3,12 @@ require "pathname"  # undefined method `Pathname' for TreeSitter:Module (NoMetho
 require "tree_stand"
 ::TreeStand.config.parser_path = ::File.expand_path "~/.context_grep"
 
+require "shellwords"
 require "fileutils"
 ZIP_FILENAME = ::File.join ::TreeStand.config.parser_path, "temp.zip"
 def ContextGrep what, where = "."
 
-  `#{system("rg --version >/dev/null 2>&1") ? "rg -n" : "grep -nrI"} #{what} #{where} 2>/dev/null`
+  `#{system("rg --version >/dev/null 2>&1") ? "rg -n" : "grep -nrI"} #{::Shellwords.shelljoin [what, where]} 2>/dev/null`
   .scan(/^([^:]+):(\d+):/).group_by(&:first).map do |file, group|
     lang = ::Linguist::FileBlob.new(file).language
     next ::STDERR.puts "unsupported grammar #{lang} at #{file}" unless ts_name = {
